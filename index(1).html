@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kababçı | QR Menü</title>
+<style>
+* {margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif;}
+body {background:#0d0d0d; color:#fff;}
+header {background:#1a0000; padding:20px; text-align:center; border-bottom:3px solid #8b0000;}
+header h1 {color:#ff3b3b; font-size:2rem; letter-spacing:1px;}
+.search {padding:15px; text-align:center;}
+.search input {width:90%; padding:12px; background:#1c1c1c; border:2px solid #8b0000; border-radius:8px; color:#fff; font-size:1rem;}
+.cart-summary {padding:15px; text-align:center; font-size:1.2rem; color:#ffd700;}
+.reset-cart {margin-left:10px; padding:5px 10px; background:#ff3b3b; color:#fff; border:none; border-radius:5px; cursor:pointer; transition:0.2s;}
+.reset-cart:hover {background:#ff6b6b;}
+.section {padding:20px;}
+.section h2 {color:#ff3b3b; margin-bottom:10px; border-bottom:2px solid #8b0000; padding-bottom:5px;}
+.card {background:#1a1a1a; border-radius:12px; margin-bottom:15px; overflow:hidden; display:flex; box-shadow:0 4px 8px rgba(255,0,0,0.3); transition:transform 0.2s; align-items:center;}
+.card:hover {transform:scale(1.02);}
+.card img {width:100px; height:100px; object-fit:contain; border-right:3px solid #8b0000; border-radius:12px 0 0 12px; background:#1a1a1a;}
+.info {padding:10px; flex:1;}
+.info h3 {color:#ff6b6b; font-size:1.1rem;}
+.price {margin-top:6px; font-weight:bold; color:#ffd700;}
+.add-cart {margin-top:8px; padding:5px 10px; background:#ff3b3b; color:#fff; border:none; border-radius:5px; cursor:pointer; transition:0.2s;}
+.add-cart:hover {background:#ff6b6b;}
+footer {background:#1a0000; text-align:center; padding:15px; color:#aaa; margin-top:20px; font-size:0.9rem;}
+
+@media(max-width:600px){
+    .card {flex-direction:column; text-align:center;}
+    .card img {width:100%; height:auto; border-right:none; border-bottom:3px solid #8b0000; border-radius:12px 12px 0 0;}
+}
+</style>
+</head>
+<body>
+<header><h1>Kababçı QR Menü</h1></header>
+
+<div class="search">
+    <input type="text" id="searchInput" placeholder="Menyu axtar...">
+</div>
+
+<!-- Səbət toplamı və sıfırlama düyməsi -->
+<div class="cart-summary">
+    Səbət: 0 ₼ 
+    <button class="reset-cart" onclick="resetCart()">Sıfırla</button>
+</div>
+
+<div id="menu"></div>
+
+<!-- Alma səsi -->
+<audio id="addSound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
+
+<footer>© 2026 Kababçı</footer>
+
+<script>
+const menuData = [
+    {category:"Kabablar", items:[
+        {name:"Adana Kababı", price:"18 ₼", img:"adana-kebabı-porsiyon-nizam-pide-sütlaç-istanbul-beyoğlu-istiklal-caddesi-600x600.jpg"},
+        {name:"Urfa Kababı", price:"17 ₼", img:"403236_2f670136074b499d851986079f78333b~mv2.avif"},
+        {name:"Beyti Kababı", price:"19 ₼", img:"beyti_kebabi_2_5e73310365.webp"},
+        {name:"Tavuk Şiş", price:"15 ₼", img:"tavuk-sis-1080x1080.jpg"},
+        {name:"Kuzu Kababı", price:"22 ₼", img:"beeves-kebap-c33163.jpg"}
+    ]},
+    {category:"Soyuq İçkilər", items:[
+        {name:"Ayran", price:"2 ₼", img:"250px-Fresh_ayran.jpg"},
+        {name:"Kola", price:"3 ₼", img:"317531-600x600.webp"},
+        {name:"Qazlı Su", price:"2 ₼", img:"1000004092.webp"},
+        {name:"Meyvə Şirəsi", price:"4 ₼", img:"65cef4326276b65cef4326276c170806174665cef4326276665cef43262769.jpeg"}
+    ]},
+    {category:"Çaylar", items:[
+        {name:"Qara Çay", price:"1 ₼", img:"792940_joc4ogxjyc.jpg"},
+        {name:"Limonlu Çay", price:"1.5 ₼", img:"1733379336_13f69f4f-eb7b-ea11-80f5-a0369f7d1486.jpg"}
+    ]},
+    {category:"Kabab Setləri", items:[
+        {name:"2 Nəfərlik kabab Seti", price:"35 ₼", img:"01JS19CME0CA7G8K24MRCP9GW2.webp"},
+        {name:"Ailə Seti", price:"52 ₼", img:"IMG_8001-scaled.jpg"},
+        {name:"Premium kabab Seti", price:"60 ₼", img:"66d1670574897f2f10536396.avif"}
+    ]}
+];
+
+let cartTotal = 0; // Səbət toplamı
+const addSound = document.getElementById("addSound");
+
+function renderMenu(data) {
+    const menu = document.getElementById("menu");
+    menu.innerHTML = "";
+    data.forEach(section => {
+        const div = document.createElement("div");
+        div.className = "section";
+        div.innerHTML = `<h2>${section.category}</h2>`;
+        section.items.forEach(item => {
+            div.innerHTML += `
+            <div class="card">
+                <img src="${item.img}" alt="${item.name}">
+                <div class="info">
+                    <h3>${item.name}</h3>
+                    <div class="price">${item.price}</div>
+                    <button class="add-cart" onclick="addToCart('${item.price}')">Səbətə əlavə et</button>
+                </div>
+            </div>`;
+        });
+        menu.appendChild(div);
+    });
+}
+
+// Səbətə əlavə funksiyası
+function addToCart(priceStr) {
+    let price = parseFloat(priceStr.replace(" ₼",""));
+    cartTotal += price;
+    document.querySelector(".cart-summary").innerText = `Səbət: ${cartTotal.toFixed(2)} ₼`;
+    // Səs çal
+    addSound.currentTime = 0;
+    addSound.play();
+    // Sıfırlama düyməsini əlavə et
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "reset-cart";
+    resetBtn.innerText = "Sıfırla";
+    resetBtn.onclick = resetCart;
+    document.querySelector(".cart-summary").appendChild(resetBtn);
+}
+
+// Səbəti sıfırlama funksiyası
+function resetCart() {
+    cartTotal = 0;
+    document.querySelector(".cart-summary").innerText = `Səbət: 0 ₼`;
+    // Sıfırlama düyməsini yenidən əlavə et
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "reset-cart";
+    resetBtn.innerText = "Sıfırla";
+    resetBtn.onclick = resetCart;
+    document.querySelector(".cart-summary").appendChild(resetBtn);
+}
+
+// Axtarış funksiyası
+document.getElementById("searchInput").addEventListener("input", e => {
+    const v = e.target.value.toLowerCase();
+    const filtered = menuData.map(s => ({
+        category: s.category,
+        items: s.items.filter(i => i.name.toLowerCase().includes(v))
+    })).filter(s => s.items.length > 0);
+    renderMenu(filtered);
+});
+
+renderMenu(menuData);
+</script>
+</body>
+</html>
